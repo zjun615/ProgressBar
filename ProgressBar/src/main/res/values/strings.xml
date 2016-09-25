@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ProgressBar</string>
+
+    <string name="CircleDotProgressBar_speed_up_one_key">一键加速</string>
+</resources>
