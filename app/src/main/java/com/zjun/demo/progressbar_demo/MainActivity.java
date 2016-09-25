@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!isProgressGoing) {
                     if (progress == max) {
                         progress = 0;
+                        bar_all.setProgress(progress);
                     }
                     startProgress();
                 } else {
@@ -83,13 +84,13 @@ public class MainActivity extends AppCompatActivity {
                     if (!isProgressGoing) {
                         return;
                     }
-                    if (progress >= max) {
+                    if (++progress >= max) {
                         progress = max;
                         bar_all.setProgress(progress);
                         stopProgress();
                         return;
                     }
-                    bar_all.setProgress(progress++);
+                    bar_all.setProgress(progress);
                 }
             };
         }

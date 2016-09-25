@@ -122,7 +122,7 @@ public class CircleDotProgressBar extends View{
         ta.recycle();
 
         // 其他准备工作
-        mSin_1 = (float) Math.sin(Math.toRadians(1));
+        mSin_1 = (float) Math.sin(Math.toRadians(1)); // 求sin(1°)。角度需转换成弧度
         mPaint = new Paint();
         mPaint.setAntiAlias(true); // 消除锯齿
         mPath = new Path();
@@ -153,15 +153,15 @@ public class CircleDotProgressBar extends View{
         int count = 0;
         // 1.1 当前进度
         while (count++ < percent) {
-            canvas.rotate(3.6f, centerX, centerY);
             canvas.drawCircle(centerX, centerY - outerRadius + dotRadius, dotRadius, mPaint);
+            canvas.rotate(3.6f, centerX, centerY);
         }
         // 1.2 未完成进度
         mPaint.setColor(dotBgColor);
         count--;
         while (count++ < 100) {
-            canvas.rotate(3.6f, centerX, centerY);
             canvas.drawCircle(centerX, centerY - outerRadius + dotRadius, dotRadius, mPaint);
+            canvas.rotate(3.6f, centerX, centerY);
         }
 
         if (showMode == SHOW_MODE_NULL) {
@@ -312,7 +312,7 @@ public class CircleDotProgressBar extends View{
      * 判断坐标是否在按钮中
      * @param x 坐标的x
      * @param y 坐标的y
-     * @return true-在按钮中，false-不在
+     * @return true-在按钮中，false-不在按钮中
      */
     private boolean isTouchInButton(final float x, final float y) {
         // 判断是否在按钮矩形中
