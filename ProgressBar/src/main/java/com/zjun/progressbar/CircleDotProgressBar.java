@@ -65,7 +65,7 @@ public class CircleDotProgressBar extends View{
     private Paint mPaint;
     private Path mPath;
     private RectF mRectF;
-    private float mTan_1; // tan(1°)
+    private float mSin_1; // sin(1°)
     private boolean mIsButtonTouched; // 按钮是否被触摸到
 
     private PointF mButtonRect_start;   // 按钮背景的方块左上角开始点
@@ -122,7 +122,7 @@ public class CircleDotProgressBar extends View{
         ta.recycle();
 
         // 其他准备工作
-        mTan_1 = (float) Math.tan(Math.toRadians(1));
+        mSin_1 = (float) Math.sin(Math.toRadians(1));
         mPaint = new Paint();
         mPaint.setAntiAlias(true); // 消除锯齿
         mPath = new Path();
@@ -142,9 +142,9 @@ public class CircleDotProgressBar extends View{
         float centerY = getHeight() / 2f;
 
         // outerRadius = innerRadius + dotRadius
-        // tan((360°/200)/2) = tan(0.9°) = dotRadius / innerRadius;
+        // sin((360°/200)/2) = sin(0.9°) = dotRadius / innerRadius;
         // 为了让圆点饱满一些，把角度0.9°增加0.1°到1°
-        float dotRadius = mTan_1 * outerRadius / (1 + mTan_1);
+        float dotRadius = mSin_1 * outerRadius / (1 + mSin_1);
 
 
         // 1 画进度
