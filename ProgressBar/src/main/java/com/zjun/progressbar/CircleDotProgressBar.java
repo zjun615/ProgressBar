@@ -2,15 +2,17 @@ package com.zjun.progressbar;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,10 +21,12 @@ import android.view.View;
  * File Name    : CircleDotProgressBar
  * Description  : 圆点进度条
  * Author       : Ralap
- * Update Date  : 2016/9/27
+ * Update Date  : 2016/9/28
  * Create Date  : 2016/9/24
- * Version      : v1.1
+ * Version      : v1.2
  * --------------------------------------------------
+ * v1.2     2016/9/28
+ *          使用橡皮擦，使瘦身针可以针对任意背景。
  * v1.1     2016/9/27
  *          1、优化百分比字体显示，使其更瘦小，默认使用外部字体
  *          2、添加自定义属性isPercentFontSystem，让开发者可以自己选择使用外部的（默认）还是系统的
@@ -92,6 +96,11 @@ public class CircleDotProgressBar extends View{
     private float mCenterX;
     private float mCenterY;
 
+    private Canvas mCanvas;
+    private Bitmap mBitmap;
+    private Xfermode mClearCanvasXfermode;
+    private Xfermode mPercentThinXfermode;
+
     public CircleDotProgressBar(Context context) {
         this(context, null);
     }
@@ -152,12 +161,30 @@ public class CircleDotProgressBar extends View{
 
         mPercentTypeface = isPercentFontSystem ? Typeface.DEFAULT
                 : Typeface.createFromAsset(context.getAssets(), "fonts/HelveticaNeueLTPro.ttf");
+
+        mClearCanvasXfermode = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
+        if (percentThinPadding != 0) {
+            mPercentThinXfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_OUT);
+        }
+
     }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(mBitmap);
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        // 先清除上次绘制的
+        mPaint.setXfermode(mClearCanvasXfermode);
+        mCanvas.drawPaint(mPaint);
+        mPaint.setXfermode(null);
 
         // 计算圆点半径
         float outerRadius = (getWidth() < getHeight() ? getWidth() : getHeight()) / 2f;
@@ -176,15 +203,15 @@ public class CircleDotProgressBar extends View{
         int count = 0;
         // 1.1 当前进度
         while (count++ < percent) {
-            canvas.drawCircle(mCenterX, mCenterY - outerRadius + dotRadius, dotRadius, mPaint);
-            canvas.rotate(3.6f, mCenterX, mCenterY);
+            mCanvas.drawCircle(mCenterX, mCenterY - outerRadius + dotRadius, dotRadius, mPaint);
+            mCanvas.rotate(3.6f, mCenterX, mCenterY);
         }
         // 1.2 未完成进度
         mPaint.setColor(dotBgColor);
         count--;
         while (count++ < 100) {
-            canvas.drawCircle(mCenterX, mCenterY - outerRadius + dotRadius, dotRadius, mPaint);
-            canvas.rotate(3.6f, mCenterX, mCenterY);
+            mCanvas.drawCircle(mCenterX, mCenterY - outerRadius + dotRadius, dotRadius, mPaint);
+            mCanvas.rotate(3.6f, mCenterX, mCenterY);
         }
 
         if (showMode == SHOW_MODE_NULL) {
@@ -192,12 +219,14 @@ public class CircleDotProgressBar extends View{
         }
 
         // 绘制百分比+单位
-        drawPercentUnit(canvas);
+        drawPercentUnit(mCanvas);
 
         if (showMode == SHOW_MODE_ALL) {
             // 绘制按钮
-            drawButton(canvas);
+            drawButton(mCanvas);
         }
+
+        canvas.drawBitmap(mBitmap, 0, 0, null);
     }
 
     /**
@@ -237,20 +266,13 @@ public class CircleDotProgressBar extends View{
 
         // 2.1.1 对百分比瘦身
         if (percentThinPadding != 0) {
-            int bgColor = Color.TRANSPARENT;
-            Drawable bgDrawable = getBackground();
-            // 确保有背景，且是纯颜色背景（图片则是BitmapDrawable）
-            if (bgDrawable != null && bgDrawable instanceof ColorDrawable) {
-                bgColor = ((ColorDrawable)bgDrawable).getColor();
-            }
-            if (bgColor != Color.TRANSPARENT) {
-                // 使用Stroke进行瘦身
-                mPaint.setColor(bgColor);
-                mPaint.setStyle(Paint.Style.STROKE);
-                mPaint.setStrokeWidth(percentThinPadding);
-                canvas.drawText(percent + "", mCenterX - textWidth / 2, baseline, mPaint);
-                mPaint.setStyle(Paint.Style.FILL);
-            }
+            // 使用橡皮擦擦除
+            mPaint.setXfermode(mPercentThinXfermode);
+            mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setStrokeWidth(percentThinPadding);
+            canvas.drawText(percent + "", mCenterX - textWidth / 2, baseline, mPaint);
+            mPaint.setXfermode(null);
+            mPaint.setStyle(Paint.Style.FILL);
         }
 
         // 2.2 画单位
