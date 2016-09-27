@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         bar_null = $(R.id.bar_null);
         bar_all = $(R.id.bar_all);
 
-        bar_percent.setProgress(87);
+        bar_percent.setProgress(65);
         bar_null.setProgress(89);
 
         bar_all.setProgressMax(max);
@@ -122,7 +122,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBtnClick(View view) {
-        startActivity(new Intent(this, UnitAlignModeActivity.class));
+        switch (view.getId()) {
+            case R.id.btn_unit_align:
+                startActivity(new Intent(this, UnitAlignModeActivity.class));
+                break;
+            case R.id.btn_percent_show:
+                startActivity(new Intent(this, PercentShowActivity.class));
+                break;
+        }
+
     }
 
     private <V extends View> V $(int id) {

@@ -8,6 +8,9 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,8 +19,18 @@ import android.view.View;
  * File Name    : CircleDotProgressBar
  * Description  : 圆点进度条
  * Author       : Ralap
+ * Update Date  : 2016/9/27
  * Create Date  : 2016/9/24
- * Version      : v1
+ * Version      : v1.1
+ * --------------------------------------------------
+ * v1.1     2016/9/27
+ *          1、优化百分比字体显示，使其更瘦小，默认使用外部字体
+ *          2、添加自定义属性isPercentFontSystem，让开发者可以自己选择使用外部的（默认）还是系统的
+ *          3、添加自定义属性percentThinPadding，如果觉得字体大（背景是纯颜色），还可以使用此瘦身针
+ *          4、优化绘制按钮时的冗余代码，进行抽取
+ *
+ * v1       2016/9/24
+ *          新建
  */
 @SuppressWarnings("unused")
 public class CircleDotProgressBar extends View{
@@ -44,6 +57,8 @@ public class CircleDotProgressBar extends View{
 
     private float percentTextSize;
     private int percentTextColor;
+    private boolean isPercentFontSystem;
+    private int percentThinPadding;
 
     private String unitText;
     private float unitTextSize;
@@ -67,12 +82,15 @@ public class CircleDotProgressBar extends View{
     private RectF mRectF;
     private float mSin_1; // sin(1°)
     private boolean mIsButtonTouched; // 按钮是否被触摸到
+    private Typeface mPercentTypeface;
 
     private PointF mButtonRect_start;   // 按钮背景的方块左上角开始点
     private PointF mButtonRect_end;     // 按钮背景的方块右下角结束点
     private float mButtonRadius;
 
     private OnClickListener mButtonClickListener; // 按钮点击事件
+    private float mCenterX;
+    private float mCenterY;
 
     public CircleDotProgressBar(Context context) {
         this(context, null);
@@ -96,6 +114,8 @@ public class CircleDotProgressBar extends View{
         if (showMode != SHOW_MODE_NULL) {
             percentTextSize = ta.getDimension(R.styleable.CircleDotProgressBar_percentTextSize, dp2px(30));
             percentTextColor = ta.getInt(R.styleable.CircleDotProgressBar_percentTextColor, Color.WHITE);
+            isPercentFontSystem = ta.getBoolean(R.styleable.CircleDotProgressBar_isPercentFontSystem, false);
+            percentThinPadding = ta.getInt(R.styleable.CircleDotProgressBar_percentThinPadding, 0);
 
             unitText = ta.getString(R.styleable.CircleDotProgressBar_unitText);
             unitTextSize = ta.getDimension(R.styleable.CircleDotProgressBar_unitTextSize, percentTextSize);
@@ -129,6 +149,9 @@ public class CircleDotProgressBar extends View{
         mRectF = new RectF();
         mButtonRect_start = new PointF();
         mButtonRect_end = new PointF();
+
+        mPercentTypeface = isPercentFontSystem ? Typeface.DEFAULT
+                : Typeface.createFromAsset(context.getAssets(), "fonts/HelveticaNeueLTPro.ttf");
     }
 
 
@@ -138,8 +161,8 @@ public class CircleDotProgressBar extends View{
 
         // 计算圆点半径
         float outerRadius = (getWidth() < getHeight() ? getWidth() : getHeight()) / 2f;
-        float centerX = getWidth() / 2f;
-        float centerY = getHeight() / 2f;
+        mCenterX = getWidth() / 2f;
+        mCenterY = getHeight() / 2f;
 
         // outerRadius = innerRadius + dotRadius
         // sin((360°/200)/2) = sin(0.9°) = dotRadius / innerRadius;
@@ -153,127 +176,137 @@ public class CircleDotProgressBar extends View{
         int count = 0;
         // 1.1 当前进度
         while (count++ < percent) {
-            canvas.drawCircle(centerX, centerY - outerRadius + dotRadius, dotRadius, mPaint);
-            canvas.rotate(3.6f, centerX, centerY);
+            canvas.drawCircle(mCenterX, mCenterY - outerRadius + dotRadius, dotRadius, mPaint);
+            canvas.rotate(3.6f, mCenterX, mCenterY);
         }
         // 1.2 未完成进度
         mPaint.setColor(dotBgColor);
         count--;
         while (count++ < 100) {
-            canvas.drawCircle(centerX, centerY - outerRadius + dotRadius, dotRadius, mPaint);
-            canvas.rotate(3.6f, centerX, centerY);
+            canvas.drawCircle(mCenterX, mCenterY - outerRadius + dotRadius, dotRadius, mPaint);
+            canvas.rotate(3.6f, mCenterX, mCenterY);
         }
 
         if (showMode == SHOW_MODE_NULL) {
             return;
         }
 
+        // 绘制百分比+单位
+        drawPercentUnit(canvas);
+
+        if (showMode == SHOW_MODE_ALL) {
+            // 绘制按钮
+            drawButton(canvas);
+        }
+    }
+
+    /**
+     * 绘制百分比和单位
+     * @param canvas 画布
+     */
+    private void drawPercentUnit(Canvas canvas) {
+        // 测量百分比和单位的宽度
+        mPaint.setTypeface(mPercentTypeface);
+        mPaint.setTextSize(percentTextSize);
+        float percentTextWidth = mPaint.measureText(percent + "");
+
+        mPaint.setTypeface(Typeface.DEFAULT);
+        mPaint.setTextSize(unitTextSize);
+        float unitTextWidth = mPaint.measureText(unitText);
+        Paint.FontMetrics fm_unit = mPaint.getFontMetrics();
+
+        float textWidth = percentTextWidth + unitTextWidth;
+
+        float baseline = 0;
         if (showMode == SHOW_MODE_PERCENT) {
-            // 2 画百分比和单位：水平和垂直居中
-            // 测量宽度
-            mPaint.setTextSize(percentTextSize);
-//            mPaint.setTypeface(Typeface.DEFAULT_BOLD); // 粗体
-            float percentTextWidth = mPaint.measureText(percent + "");
-
-            mPaint.setTextSize(unitTextSize);
-            float unitTextWidth = mPaint.measureText(unitText);
-            Paint.FontMetrics fm_unit = mPaint.getFontMetrics();
-
-            float textWidth = percentTextWidth + unitTextWidth;
             float textHeight = percentTextSize > unitTextSize ? percentTextSize : unitTextSize;
-
             // 计算Text垂直居中时的baseline
             mPaint.setTextSize(textHeight);
             Paint.FontMetrics fm = mPaint.getFontMetrics();
             // 字体在垂直居中时，字体中间就是centerY，加上字体实际高度的一半就是descent线，减去descent就是baseline线的位置（fm中以baseline为基准）
-            float baseline = centerY + (fm.descent - fm.ascent)/2 - fm.descent;
-
-            // 2.1 画百分比
-            mPaint.setTextSize(percentTextSize);
-            mPaint.setColor(percentTextColor);
-            canvas.drawText(percent + "", centerX - textWidth / 2, baseline, mPaint);
-
-            // 2.2 画单位
-            mPaint.setTextSize(unitTextSize);
-            mPaint.setColor(unitTextColor);
-            // 单位对齐方式
-            switch (unitTextAlignMode) {
-                case UNIT_TEXT_ALIGN_MODE_CN:
-                    baseline -= fm_unit.descent / 4;
-                    break;
-                case UNIT_TEXT_ALIGN_MODE_EN:
-                    baseline -= fm_unit.descent * 2/3;
-            }
-            canvas.drawText(unitText, centerX - textWidth / 2 + percentTextWidth, baseline, mPaint);
+            baseline = mCenterY + (fm.descent - fm.ascent)/2 - fm.descent;
         }else if (showMode == SHOW_MODE_ALL) {
-            // 2 画百分比和单位：水平居中，垂直方向的baseline在centerY
-            // 测量宽度
-            mPaint.setTextSize(percentTextSize);
-//            mPaint.setTypeface(Typeface.DEFAULT_BOLD); // 粗体
-            float percentTextWidth = mPaint.measureText(percent + "");
-
-            mPaint.setTextSize(unitTextSize);
-            float unitTextWidth = mPaint.measureText(unitText);
-            Paint.FontMetrics fm_unit = mPaint.getFontMetrics();
-
-            float textWidth = percentTextWidth + unitTextWidth;
-
-            // 2.1 画百分比
-            mPaint.setTextSize(percentTextSize);
-            mPaint.setColor(percentTextColor);
-            float baseline_per = centerY;
-            canvas.drawText(percent + "", centerX - textWidth / 2, baseline_per, mPaint);
-
-            // 2.2 画单位
-            mPaint.setTextSize(unitTextSize);
-            mPaint.setColor(unitTextColor);
-            // 单位对齐方式
-            switch (unitTextAlignMode) {
-                case UNIT_TEXT_ALIGN_MODE_CN:
-                    baseline_per -= fm_unit.descent / 4;
-                    break;
-                case UNIT_TEXT_ALIGN_MODE_EN:
-                    baseline_per -= fm_unit.descent * 2/3;
-            }
-            canvas.drawText(unitText, centerX - textWidth / 2 + percentTextWidth, baseline_per, mPaint);
-
-            // 3 画按钮
-            mPaint.setTextSize(buttonTextSize);
-            float buttonTextWidth = mPaint.measureText(buttonText);
-            Paint.FontMetrics fm = mPaint.getFontMetrics();
-
-            // 3.1 画按钮背景
-            mPaint.setStyle(Paint.Style.FILL);
-            mPaint.setColor(mIsButtonTouched ? buttonClickBgColor : buttonBgColor);
-            float buttonHeight = 2 * buttonTextSize;
-            mButtonRadius = buttonHeight / 2;
-
-            mButtonRect_start.set(centerX - buttonTextWidth / 2, centerY + buttonTopOffset);
-            mButtonRect_end.set(centerX + buttonTextWidth/2, centerY + buttonTopOffset + buttonHeight);
-
-            mPath.reset();
-            mPath.moveTo(mButtonRect_start.x, mButtonRect_start.y);
-            mPath.rLineTo(buttonTextWidth, 0);
-            float left = centerX + buttonTextWidth/2 - mButtonRadius;
-            float top = centerY + buttonTopOffset;
-            float right = left + 2 * mButtonRadius;
-            float bottom = top + 2 * mButtonRadius;
-            mRectF.set(left, top, right, bottom);
-            mPath.arcTo(mRectF, 270, 180); // 参数1：内切这个方形，参数2：开始角度，参数3：画的角度范围
-            mPath.rLineTo(-buttonTextWidth, 0);
-            mRectF.offset(-buttonTextWidth, 0); // 平移位置
-            mPath.arcTo(mRectF, 90, 180);
-            mPath.close();
-            canvas.drawPath(mPath, mPaint);
-
-            // 3.2 画按钮文本
-            mPaint.setColor(mIsButtonTouched ? buttonClickColor : buttonTextColor);
-            float baseline = centerY + buttonTopOffset + buttonTextSize + (fm.descent - fm.ascent)/2 - fm.descent;
-            canvas.drawText(buttonText, centerX - buttonTextWidth / 2, baseline, mPaint);
-
+            baseline = mCenterY;
         }
+
+        // 2.1 画百分比
+        mPaint.setTypeface(mPercentTypeface);
+        mPaint.setTextSize(percentTextSize);
+        mPaint.setColor(percentTextColor);
+        canvas.drawText(percent + "", mCenterX - textWidth / 2, baseline, mPaint);
+
+        // 2.1.1 对百分比瘦身
+        if (percentThinPadding != 0) {
+            int bgColor = Color.TRANSPARENT;
+            Drawable bgDrawable = getBackground();
+            // 确保有背景，且是纯颜色背景（图片则是BitmapDrawable）
+            if (bgDrawable != null && bgDrawable instanceof ColorDrawable) {
+                bgColor = ((ColorDrawable)bgDrawable).getColor();
+            }
+            if (bgColor != Color.TRANSPARENT) {
+                // 使用Stroke进行瘦身
+                mPaint.setColor(bgColor);
+                mPaint.setStyle(Paint.Style.STROKE);
+                mPaint.setStrokeWidth(percentThinPadding);
+                canvas.drawText(percent + "", mCenterX - textWidth / 2, baseline, mPaint);
+                mPaint.setStyle(Paint.Style.FILL);
+            }
+        }
+
+        // 2.2 画单位
+        mPaint.setTypeface(Typeface.DEFAULT);
+        mPaint.setTextSize(unitTextSize);
+        mPaint.setColor(unitTextColor);
+        // 单位对齐方式
+        switch (unitTextAlignMode) {
+            case UNIT_TEXT_ALIGN_MODE_CN:
+                baseline -= fm_unit.descent / 4;
+                break;
+            case UNIT_TEXT_ALIGN_MODE_EN:
+                baseline -= fm_unit.descent * 2/3;
+        }
+        canvas.drawText(unitText, mCenterX - textWidth / 2 + percentTextWidth, baseline, mPaint);
     }
 
+    /**
+     * 绘制按钮
+     * @param canvas 画布
+     */
+    private void drawButton(Canvas canvas) {
+        // 3 画按钮
+        mPaint.setTextSize(buttonTextSize);
+        float buttonTextWidth = mPaint.measureText(buttonText);
+        Paint.FontMetrics fm = mPaint.getFontMetrics();
+
+        // 3.1 画按钮背景
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setColor(mIsButtonTouched ? buttonClickBgColor : buttonBgColor);
+        float buttonHeight = 2 * buttonTextSize;
+        mButtonRadius = buttonHeight / 2;
+
+        mButtonRect_start.set(mCenterX - buttonTextWidth / 2, mCenterY + buttonTopOffset);
+        mButtonRect_end.set(mCenterX + buttonTextWidth / 2, mCenterY + buttonTopOffset + buttonHeight);
+
+        mPath.reset();
+        mPath.moveTo(mButtonRect_start.x, mButtonRect_start.y);
+        mPath.rLineTo(buttonTextWidth, 0);
+        float left = mCenterX + buttonTextWidth / 2 - mButtonRadius;
+        float top = mCenterY + buttonTopOffset;
+        float right = left + 2 * mButtonRadius;
+        float bottom = top + 2 * mButtonRadius;
+        mRectF.set(left, top, right, bottom);
+        mPath.arcTo(mRectF, 270, 180); // 参数1：内切这个方形，参数2：开始角度，参数3：画的角度范围
+        mPath.rLineTo(-buttonTextWidth, 0);
+        mRectF.offset(-buttonTextWidth, 0); // 平移位置
+        mPath.arcTo(mRectF, 90, 180);
+        mPath.close();
+        canvas.drawPath(mPath, mPaint);
+
+        // 3.2 画按钮文本
+        mPaint.setColor(mIsButtonTouched ? buttonClickColor : buttonTextColor);
+        float baseline = mCenterY + buttonTopOffset + buttonTextSize + (fm.descent - fm.ascent) / 2 - fm.descent;
+        canvas.drawText(buttonText, mCenterX - buttonTextWidth / 2, baseline, mPaint);
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -426,6 +459,22 @@ public class CircleDotProgressBar extends View{
 
     public void setPercentTextColor(int percentTextColor) {
         this.percentTextColor = percentTextColor;
+    }
+
+    public boolean isPercentFontSystem() {
+        return isPercentFontSystem;
+    }
+
+    public void setIsPercentFontSystem(boolean isPercentFontSystem) {
+        this.isPercentFontSystem = isPercentFontSystem;
+    }
+
+    public int getPercentThinPadding() {
+        return percentThinPadding;
+    }
+
+    public void setPercentThinPadding(int percentThinPadding) {
+        this.percentThinPadding = percentThinPadding;
     }
 
     public String getUnitText() {

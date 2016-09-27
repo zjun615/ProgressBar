@@ -15,7 +15,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".UnitAlignModeActivity"></activity>
+        <activity android:name=".UnitAlignModeActivity" />
+        <activity android:name=".PercentShowActivity"></activity>
     </application>
 
 </manifest>

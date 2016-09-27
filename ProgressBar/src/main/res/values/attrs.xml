@@ -20,6 +20,10 @@
         <!--显示的百分比-->
         <attr name="percentTextSize" format="dimension" />
         <attr name="percentTextColor" format="color" />
+        <!--百分比使用系统字体，默认为false(使用外部导入字体assets/fonts/HelveticaNeueLTPro.ttf)-->
+        <attr name="isPercentFontSystem" format="boolean" />
+        <!--百分比瘦身大小。仅适用在背景是纯颜色(非空、非透明、非图片背景)的情况下-->
+        <attr name="percentThinPadding" format="integer" />
 
         <!--百分比单位-->
         <attr name="unitText" format="string" />

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:zjun="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.zjun.demo.progressbar_demo.PercentShowActivity">
+
+    <GridLayout
+        android:id="@+id/gl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray"
+        android:columnCount="3"
+        android:rowCount="6">
+
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_columnSpan="3"
+            android:layout_gravity="center"
+            android:text="百分比字体类型与瘦身(需纯颜色背景)"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_gravity="center"
+            android:text="瘦身" />
+
+        <TextView
+            android:layout_gravity="center"
+            android:text="默认字体" />
+
+
+        <TextView
+            android:layout_gravity="center"
+            android:text="系统字体" />
+
+        <TextView
+            android:layout_gravity="center"
+            android:text="0（默认）" />
+
+        <com.zjun.progressbar.CircleDotProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="1dp"
+            zjun:percentTextSize="60sp"
+            zjun:unitText="分"
+            zjun:unitTextAlignMode="CN"
+            zjun:unitTextSize="30sp" />
+
+        <com.zjun.progressbar.CircleDotProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="1dp"
+            zjun:isPercentFontSystem="true"
+            zjun:percentTextSize="60sp"
+            zjun:unitText="分"
+            zjun:unitTextAlignMode="CN"
+            zjun:unitTextSize="30sp" />
+
+        <TextView
+            android:layout_gravity="center"
+            android:text="1" />
+
+        <com.zjun.progressbar.CircleDotProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="1dp"
+            android:background="#689f6d"
+            zjun:percentTextSize="60sp"
+            zjun:percentThinPadding="1"
+            zjun:unitText="分"
+            zjun:unitTextAlignMode="CN"
+            zjun:unitTextSize="30sp" />
+
+        <com.zjun.progressbar.CircleDotProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="1dp"
+            android:background="#689f6d"
+            zjun:isPercentFontSystem="true"
+            zjun:percentTextSize="60sp"
+            zjun:percentThinPadding="1"
+            zjun:unitText="分"
+            zjun:unitTextAlignMode="CN"
+            zjun:unitTextSize="30sp" />
+
+        <TextView
+            android:layout_gravity="center"
+            android:text="2" />
+
+        <com.zjun.progressbar.CircleDotProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="1dp"
+            android:background="#689f6d"
+            zjun:percentTextSize="60sp"
+            zjun:percentThinPadding="2"
+            zjun:unitText="分"
+            zjun:unitTextAlignMode="CN"
+            zjun:unitTextSize="30sp" />
+
+        <com.zjun.progressbar.CircleDotProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="1dp"
+            android:background="#689f6d"
+            zjun:isPercentFontSystem="true"
+            zjun:percentTextSize="60sp"
+            zjun:percentThinPadding="2"
+            zjun:unitText="分"
+            zjun:unitTextAlignMode="CN"
+            zjun:unitTextSize="30sp" />
+
+        <TextView
+            android:layout_gravity="center"
+            android:text="3" />
+
+        <com.zjun.progressbar.CircleDotProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="1dp"
+            android:background="#689f6d"
+            zjun:percentTextSize="60sp"
+            zjun:percentThinPadding="3"
+            zjun:unitText="分"
+            zjun:unitTextAlignMode="CN"
+            zjun:unitTextSize="30sp" />
+
+        <com.zjun.progressbar.CircleDotProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="1dp"
+            android:background="#689f6d"
+            zjun:isPercentFontSystem="true"
+            zjun:percentTextSize="60sp"
+            zjun:percentThinPadding="3"
+            zjun:unitText="分"
+            zjun:unitTextAlignMode="CN"
+            zjun:unitTextSize="30sp" />
+
+    </GridLayout>
+
+</RelativeLayout>

@@ -11,7 +11,7 @@
         android:id="@+id/bar_percent"
         android:layout_width="200dp"
         android:layout_height="100dp"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:background="#94aac1"
         />
 
@@ -26,9 +26,9 @@
     <com.zjun.progressbar.CircleDotProgressBar
         android:id="@+id/bar_null"
         android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_height="100dp"
         android:layout_below="@+id/bar_percent"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:background="#94aac1"
         zjun:dotColor="@android:color/holo_green_dark"
         zjun:dotBgColor="@android:color/holo_red_light"
@@ -48,7 +48,7 @@
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_below="@+id/bar_null"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:background="#94aac1"
         zjun:showMode="ALL"
         zjun:percentTextSize="70sp"
@@ -72,5 +72,14 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/bar_all"
         android:text="单位与百分比对齐方式"
+        android:onClick="onBtnClick"/>
+
+    <Button
+        android:id="@+id/btn_percent_show"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/bar_all"
+        android:layout_toRightOf="@+id/btn_unit_align"
+        android:text="百分比显示方式"
         android:onClick="onBtnClick"/>
 </RelativeLayout>
