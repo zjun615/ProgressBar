@@ -9,16 +9,16 @@ Android Studio：
 
 1. 在工程根目录build.gradle的仓库里，添加jitpack仓库地址
 ```
- allprojects {
+allprojects {
     repositories {
 
         // +++添加jitpack仓库地址
         maven {url "https://jitpack.io"}
 ```
 2. 在module的build.gradle里，添加依赖
- ```
- dependencies {
-    // +++添加依赖
+```
+dependencies {
+    // +++添加依赖
     compile 'com.github.zjun615:ProgressBar:v1.1'
 ```
 
