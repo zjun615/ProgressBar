@@ -7,7 +7,7 @@ Readme
 ---
 Android Studio：
 
-1. 在工程根目录build.gradle的仓库里，添加jitpack仓库地址
+1、 在工程根目录build.gradle的仓库里，添加jitpack仓库地址
 ```
 allprojects {
     repositories {
@@ -15,7 +15,7 @@ allprojects {
         // +++添加jitpack仓库地址
         maven {url "https://jitpack.io"}
 ```
-2. 在module的build.gradle里，添加依赖
+2、 在module的build.gradle里，添加依赖
 ```
 dependencies {
     // +++添加依赖
