@@ -3,6 +3,9 @@ Readme
 本开源项目是各种自定义进度条——ProgressBar。  
 工程下的ProgressBar是进度条源码，app是demo演示
 
+用法
+-
+
 ---
 ##目录
 * [更新](#更新)
