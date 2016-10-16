@@ -19,7 +19,7 @@ allprojects {
 ```
 dependencies {
     // +++添加依赖
-    compile 'com.github.zjun615:ProgressBar:v1.1'
+    compile 'com.github.zjun615:ProgressBar:v1.3'
 ```
 
 ---
