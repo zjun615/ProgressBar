@@ -21,10 +21,13 @@ import android.view.View;
  * File Name    : CircleDotProgressBar
  * Description  : 圆点进度条
  * Author       : Ralap
- * Update Date  : 2016/9/28
+ * Update Date  : 2016/10/16
  * Create Date  : 2016/9/24
- * Version      : v1.2
+ * Version      : v1.3
  * --------------------------------------------------
+ * v1.3     2016/10/16
+ *          1、修改空显示模式不显示的问题——没有绘制到view的canvas中，被return了
+ *          2、设置进度的异常信息，移动到strings.xml中
  * v1.2     2016/9/28
  *          使用橡皮擦，使瘦身针可以针对任意背景。
  * v1.1     2016/9/27
@@ -181,6 +184,26 @@ public class CircleDotProgressBar extends View{
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        // 绘制外围圆点进度
+        drawCircleDot(mCanvas);
+
+        if (showMode != SHOW_MODE_NULL) {
+            // 绘制百分比+单位
+            drawPercentUnit(mCanvas);
+            if (showMode == SHOW_MODE_ALL) {
+                // 绘制按钮
+                drawButton(mCanvas);
+            }
+        }
+
+        canvas.drawBitmap(mBitmap, 0, 0, null);
+    }
+
+    /**
+     * 绘制圆点进度
+     * @param canvas 画布
+     */
+    private void drawCircleDot(Canvas canvas) {
         // 先清除上次绘制的
         mPaint.setXfermode(mClearCanvasXfermode);
         mCanvas.drawPaint(mPaint);
@@ -197,7 +220,7 @@ public class CircleDotProgressBar extends View{
         float dotRadius = mSin_1 * outerRadius / (1 + mSin_1);
 
 
-        // 1 画进度
+        // 画进度
         mPaint.setColor(dotColor);
         mPaint.setStyle(Paint.Style.FILL);
         int count = 0;
@@ -213,20 +236,6 @@ public class CircleDotProgressBar extends View{
             mCanvas.drawCircle(mCenterX, mCenterY - outerRadius + dotRadius, dotRadius, mPaint);
             mCanvas.rotate(3.6f, mCenterX, mCenterY);
         }
-
-        if (showMode == SHOW_MODE_NULL) {
-            return;
-        }
-
-        // 绘制百分比+单位
-        drawPercentUnit(mCanvas);
-
-        if (showMode == SHOW_MODE_ALL) {
-            // 绘制按钮
-            drawButton(mCanvas);
-        }
-
-        canvas.drawBitmap(mBitmap, 0, 0, null);
     }
 
     /**
@@ -432,7 +441,7 @@ public class CircleDotProgressBar extends View{
      */
     public synchronized void setProgress(int progress) {
         if (progress < 0 || progress > progressMax) {
-            throw new IllegalArgumentException(String.format("progress must between 0 and max(%d)", progressMax));
+            throw new IllegalArgumentException(String.format(getResources().getString(R.string.CircleDotProgressBar_progress_out_of_range), progressMax));
         }
         this.progress = progress;
         percent = progress * 100 / progressMax;
